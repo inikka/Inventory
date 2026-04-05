@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Inventory Control | Smart Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9f0f5 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            padding: 30px 24px 50px;
+        }
+
+        /* main container */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .header {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 2rem;
+            padding: 1.2rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #1a3c5e, #2b5a84);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .logo p {
+            font-size: 0.8rem;
+            color: #4a627a;
+            font-weight: 500;
+        }
+        .status-badge {
+            background: #1e2f3f;
+            padding: 8px 20px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: inset 0 0 2px #ffffff50, 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .status-badge span {
+            color: #9effcf;
+        }
+
+        /* cards row */
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            flex: 1 1 200px;
+            padding: 1.3rem 1rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: all 0.2s;
+            border-bottom: 4px solid #2b5a84;
+        }
+        .stat-card h3 {
+            font-size: 1rem;
+            color: #3e5a6f;
+            margin-bottom: 8px;
+        }
+        .stat-card .number {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #1e4663;
+        }
+
+        /* two column layout */
+        .grid-panels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+        }
+        .panel {
+            flex: 1.2;
+            min-width: 280px;
+            background: white;
+            border-radius: 1.8rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .panel:last-child {
+            flex: 2;
+        }
+        .panel-title {
+            background: #f8fafd;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 2px solid #e2edf2;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1e3a5f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .panel-content {
+            padding: 1.5rem;
+        }
+
+        /* form styles */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2c4c6e;
+            margin-bottom: 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 1rem;
+            border: 1.5px solid #cfdfe8;
+            background: #fff;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2b6a9e;
+            box-shadow: 0 0 0 3px rgba(43,106,158,0.2);
+        }
+        button {
+            background: #2b5a84;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            margin-top: 8px;
+        }
+        button:hover {
+            background: #1e3f5a;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #5f7f9e;
+        }
+        .btn-danger {
+            background: #b13e3e;
+        }
+        .btn-danger:hover {
+            background: #8e2c2c;
+        }
+
+        /* inventory table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid #e9edf2;
+        }
+        th {
+            background: #eef3fc;
+            color: #1f486b;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f9fdfe;
+        }
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            border-radius: 40px;
+            width: auto;
+            margin: 0;
+        }
+        .edit-btn {
+            background: #3c7e5c;
+        }
+        .delete-btn {
+            background: #c74545;
+        }
+        .message-area {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            background: #f0f7fb;
+            color: #1f5e3a;
+            text-align: center;
+        }
+        .error-msg {
+            background: #ffe8e6;
+            color: #b13e3e;
+        }
+        .footer-note {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #3f627c;
+            border-top: 1px dashed #bdd4e0;
+            padding-top: 25px;
+        }
+        @media (max-width: 780px) {
+            body { padding: 20px 16px; }
+            .panel-title { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="header">
+        <div class="logo">
+            <h1>📦 StockWise ICS</h1>
+            <p>Inventory Control Management | MySQL Edition</p>
+        </div>
+        <div class="status-badge">
+            🟢 <span>Live DB</span> · MySQL Connected via API
+        </div>
+    </div>
+
+    <div class="stats-row" id="statsContainer">
+        <div class="stat-card"><h3>Total Products</h3><div class="number" id="totalProducts">-</div></div>
+        <div class="stat-card"><h3>Low Stock (≤5)</h3><div class="number" id="lowStockCount">-</div></div>
+        <div class="stat-card"><h3>Total Value (₹)</h3><div class="number" id="totalValue">-</div></div>
+    </div>
+
+    <div class="grid-panels">
+        <!-- ADD / UPDATE PRODUCT PANEL -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>➕</span> Product Manager
+            </div>
+            <div class="panel-content">
+                <form id="productForm">
+                    <input type="hidden" id="editId" value="">
+                    <div class="form-group">
+                        <label>📛 Product Name *</label>
+                        <input type="text" id="productName" placeholder="e.g., Wireless Mouse" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🏷️ SKU / Code *</label>
+                        <input type="text" id="sku" placeholder="SKU-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>📊 Quantity *</label>
+                        <input type="number" id="quantity" placeholder="0" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>💰 Price (₹) *</label>
+                        <input type="number" id="price" step="0.01" placeholder="499.99" required>
+                    </div>
+                    <div class="form-group">
+                        <label>📂 Category</label>
+                        <select id="category">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Stationery">Stationery</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="submitBtn">➕ Add Product</button>
+                    <button type="button" id="cancelEditBtn" class="btn-secondary" style="margin-top: 8px; background:#9aaebf;">Cancel Edit</button>
+                </form>
+                <div id="formFeedback" class="message-area"></div>
+            </div>
+        </div>
+
+        <!-- INVENTORY LIST PANEL -->
+        <div class="panel">
+            <div class="panel-title">
+                <span>📋</span> Current Inventory
+                <span style="font-size:0.8rem; margin-left:auto;">⚡ real-time sync</span>
+            </div>
+            <div class="panel-content">
+                <div class="table-wrapper">
+                    <table id="inventoryTable">
+                        <thead>
+                            <tr><th>ID</th><th>Name</th><th>SKU</th><th>Qty</th><th>Price</th><th>Category</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr><td colspan="7" style="text-align:center;">Loading products...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="tableFeedback" class="message-area"></div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-note">
+        ✅ Full CRUD operations | MySQL backend via PHP API (simulated fetch) — Replace API endpoint with your actual backend.
+    </div>
+</div>
+
+<script>
+    // -------------------  CONFIGURATION -------------------
+    // 🔁 IMPORTANT: Replace this URL with your actual backend PHP endpoint that connects to MySQL.
+    // The backend should support GET (fetch all, stats), POST (add/update), DELETE (remove).
+    // For demo / local development, we provide a MOCK simulation using localStorage fallback.
+    // But to truly use MySQL, implement api.php as described in comments below.
+    
+    // ================ REAL BACKEND URL (uncomment & configure) =================
+    // const API_BASE = "http://your-server.com/inventory_api.php";
+    
+    // ================ FOR THIS DEMO: using localStorage + simulated MySQL structure =========
+    // This ensures the app works out-of-the-box, but you can easily switch to real MySQL.
+    // The frontend logic is fully compatible with REST API. To connect MySQL:
+    // 1) Create a table 'products' (id, name, sku, quantity, price, category)
+    // 2) Build a PHP endpoint that handles actions: 'fetch_all', 'add', 'update', 'delete', 'get_stats'
+    // 3) Replace the functions below with fetch() calls.
+    
+    let useMockBackend = true;   // set false and provide real API endpoint for MySQL
+    
+    // Mock initial data (simulating MySQL records)
+    let mockProducts = [
+        { id: 1, name: "Wireless Keyboard", sku: "KB-123", quantity: 12, price: 1299.00, category: "Electronics" },
+        { id: 2, name: "Office Chair", sku: "CH-456", quantity: 4, price: 4599.00, category: "Furniture" },
+        { id: 3, name: "Notebook A5", sku: "NB-789", quantity: 28, price: 89.50, category: "Stationery" },
+        { id: 4, name: "USB-C Cable", sku: "UC-012", quantity: 2, price: 349.00, category: "Electronics" }
+    ];
+    let nextId = 5;
+    
+    // Helper to load mock from localStorage if any
+    function loadMockFromStorage() {
+        const stored = localStorage.getItem("inventory_mock_data");
+        if(stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                if(Array.isArray(parsed) && parsed.length) {
+                    mockProducts = parsed;
+                    // update nextId
+                    const maxId = mockProducts.reduce((max, p) => (p.id > max ? p.id : max), 0);
+                    nextId = maxId + 1;
+                }
+            } catch(e) {}
+        }
+    }
+    function saveMockToStorage() {
+        if(useMockBackend) localStorage.setItem("inventory_mock_data", JSON.stringify(mockProducts));
+    }
+    loadMockFromStorage();
+    
+    // ----------  Simulate API calls (replace with real fetch when MySQL ready) ----------
+    async function apiFetchAllProducts() {
+        if(useMockBackend) {
+            return [...mockProducts];
+        } else {
+            // real MySQL call via GET
+            const res = await fetch(`${API_BASE}?action=fetch_all`);
+            return await res.json();
+        }
+    }
+    
+    async function apiGetStats() {
+        if(useMockBackend) {
+            const totalProducts = mockProducts.length;
+            const lowStock = mockProducts.filter(p => p.quantity <= 5).length;
+            const totalValue = mockProducts.reduce((sum, p) => sum + (p.quantity * p.price), 0);
+            return { totalProducts, lowStock, totalValue };
+        } else {
+            const res = await fetch(`${API_BASE}?action=get_stats`);
+            return await res.json();
+        }
+    }
+    
+    async function apiAddProduct(product) {
+        if(useMockBackend) {
+            const newProduct = { ...product, id: nextId++ };
+            mockProducts.push(newProduct);
+            saveMockToStorage();
+            return { success: true, product: newProduct };
+        } else {
+            const res = await fetch(`${API_BASE}?action=add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(product)
+            });
+            return await res.json();
+        }
+    }
+    
+    async function apiUpdateProduct(id, updatedData) {
+        if(useMockBackend) {
+            const index = mockProducts.findIndex(p => p.id == id);
+            if(index !== -1) {
+                mockProducts[index] = { ...mockProducts[index], ...updatedData, id: Number(id) };
+                saveMockToStorage();
+                return { success: true, product: mockProducts[index] };
+            }
+            return { success: false, message: "Product not found" };
+        } else {
+            const res = await fetch(`${API_BASE}?action=update`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, ...updatedData })
+            });
+            return await res.json();
+        }
+    }
+    
+    async function apiDeleteProduct(id) {
+        if(useMockBackend) {
+            const initialLength = mockProducts.length;
+            mockProducts = mockProducts.filter(p => p.id != id);
+            if(mockProducts.length < initialLength) {
+                saveMockToStorage();
+                return { success: true };
+            }
+            return { success: false, message: "ID not found" };
+        } else {
+            const res = await fetch(`${API_BASE}?action=delete&id=${id}`, { method: "DELETE" });
+            return await res.json();
+        }
+    }
+    
+    // -------------------  UI RENDER & HELPERS -------------------
+    const tableBody = document.getElementById("tableBody");
+    const totalProductsSpan = document.getElementById("totalProducts");
+    const lowStockCountSpan = document.getElementById("lowStockCount");
+    const totalValueSpan = document.getElementById("totalValue");
+    const productForm = document.getElementById("productForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const editIdInput = document.getElementById("editId");
+    const productNameInput = document.getElementById("productName");
+    const skuInput = document.getElementById("sku");
+    const quantityInput = document.getElementById("quantity");
+    const priceInput = document.getElementById("price");
+    const categorySelect = document.getElementById("category");
+    const formFeedback = document.getElementById("formFeedback");
+    const tableFeedback = document.getElementById("tableFeedback");
+    
+    function showFormMessage(msg, isError = false) {
+        formFeedback.textContent = msg;
+        formFeedback.className = `message-area ${isError ? 'error-msg' : ''}`;
+        setTimeout(() => { if(formFeedback.textContent === msg) formFeedback.textContent = ""; }, 3000);
+    }
+    
+    function showTableMessage(msg, isError = false) {
+        tableFeedback.textContent = msg;
+        tableFeedback.className = `message-area ${isError ? 'error-msg' : ''}`;
+        setTimeout(() => { if(tableFeedback.textContent === msg) tableFeedback.textContent = ""; }, 2800);
+    }
+    
+    async function renderInventoryTable() {
+        try {
+            const products = await apiFetchAllProducts();
+            if(!products.length) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">📭 No products found. Add some!</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = products.map(prod => `
+                <tr>
+                    <td>${prod.id}</td>
+                    <td><strong>${escapeHtml(prod.name)}</strong></td>
+                    <td>${escapeHtml(prod.sku)}</td>
+                    <td style="color: ${prod.quantity <= 5 ? '#c74545' : '#2c6e2c'}; font-weight:500;">${prod.quantity}</td>
+                    <td>₹ ${Number(prod.price).toFixed(2)}</td>
+                    <td>${escapeHtml(prod.category)}</td>
+                    <td class="action-btns">
+                        <button class="edit-btn" data-id="${prod.id}">✏️ Edit</button>
+                        <button class="delete-btn" data-id="${prod.id}">🗑️ Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            // attach events dynamically
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    loadProductForEdit(id);
+                });
+            });
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    await deleteProductHandler(id);
+                });
+            });
+        } catch(err) {
+            console.error(err);
+            tableBody.innerHTML = `<tr><td colspan="7">⚠️ Failed to load inventory</td></tr>`;
+            showTableMessage("Error loading data", true);
+        }
+    }
+    
+    async function loadProductForEdit(id) {
+        const products = await apiFetchAllProducts();
+        const product = products.find(p => p.id === id);
+        if(product) {
+            editIdInput.value = product.id;
+            productNameInput.value = product.name;
+            skuInput.value = product.sku;
+            quantityInput.value = product.quantity;
+            priceInput.value = product.price;
+            categorySelect.value = product.category;
+            submitBtn.textContent = "✏️ Update Product";
+            showFormMessage("Editing mode: modify and clic
